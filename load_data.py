@@ -75,8 +75,8 @@ for filename in test_files:
 test_data = np.concatenate(test_data, 0)
 test_label = np.concatenate(test_label, 0)
 
-print "training set: ", (train_data.shape, train_label.shape)
-print "testing set: ", (test_data.shape, test_label.shape)
+print("training set: ", (train_data.shape, train_label.shape))
+print("testing set: ", (test_data.shape, test_label.shape))
 
 Z_MIN, Z_MAX = min( train_data[:,:,2].min(), test_data[:,:,2].min() ), max( train_data[:,:,2].max(), test_data[:,:,2].max() )
 

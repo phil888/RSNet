@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 
-from utils import indoor3d_util
+from data.utils import indoor3d_util
 
 #---- input arguments
 parser = argparse.ArgumentParser(description='Process input arguments.')

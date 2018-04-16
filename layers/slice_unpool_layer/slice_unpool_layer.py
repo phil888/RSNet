@@ -1,6 +1,6 @@
 import torch
 from torch.autograd import Function
-from _ext import slice_unpool_layer
+from layers.slice_unpool_layer._ext import slice_unpool_layer
 from torch.autograd import Variable
 
 

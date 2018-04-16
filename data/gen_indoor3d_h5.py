@@ -3,8 +3,8 @@ import numpy as np
 import sys
 import argparse
 
-from utils import data_prep_util
-from utils import indoor3d_util
+from data.utils import data_prep_util
+from data.utils import indoor3d_util
 
 parser = argparse.ArgumentParser(description='Process input arguments.')
 
@@ -109,7 +109,7 @@ for file in data_label_files:
     elif split == 'test' and args.area in file:
         split_list.append( file )
 
-print "{}/{} files selected".format( len(split_list), len(data_label_files) )
+print("{}/{} files selected".format( len(split_list), len(data_label_files) ))
 data_label_files = split_list
 
 sample_cnt = 0
