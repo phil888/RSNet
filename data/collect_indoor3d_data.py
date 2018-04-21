@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 
-from data.utils import indoor3d_util
+from utils import indoor3d_util
 
 #---- input arguments
 parser = argparse.ArgumentParser(description='Process input arguments.')
@@ -25,7 +25,7 @@ anno_paths = [line.rstrip() for line in open(os.path.join('./', 'utils/meta/anno
 anno_paths = [os.path.join(Stanford3dDataset_DIR, p) for p in anno_paths]
 
 output_folder = args.output_folder
-
+OUTPUT_DIR = './stanford_indoor3d'
 
 if not os.path.exists(OUTPUT_DIR):
     os.mkdir(OUTPUT_DIR)

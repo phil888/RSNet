@@ -6,14 +6,14 @@ This directory contains source codes for preparing the S3DIS dataset for RSNet. 
 
 2. Re-organize the raw dataset by the following command:
 ```bash
-$ python collect_indoor3d_data.py --raw_data_dir RAW_DATA
+$ python collect_indoor3d_data.py --raw_data_dir stanford_indoor3d
 ```
 By default, processed dataset will be stored in `./stanford_indoor3d`. Set the `--output_folder` flag to overwrite the default output path. We denote the output folder in this step as `INDOOR3D_DATA_DIR`
 
 3. Generate training and testing files for RSNet by the following commands:
 ```bash
-$ python gen_indoor3d_h5.py --indoor3d_data_dir INDOOR3D_DATA_DIR --split train
-$ python gen_indoor3d_h5.py --indoor3d_data_dir INDOOR3D_DATA_DIR --split test --stride 1.0
+$ python gen_indoor3d_h5.py --indoor3d_data_dir stanford_indoor3d --split train
+$ python gen_indoor3d_h5.py --indoor3d_data_dir stanford_indoor3d --split test --stride 1.0
 ```
 
 By default, these two commands generate files using data in `Area_5` as testing data and others as training data. Type `python gen_indoor3d_h5.py --help` for other generation options.

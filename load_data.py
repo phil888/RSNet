@@ -84,7 +84,7 @@ def iterate_data(batchsize, resolution, train_flag = True, require_ori_data=Fals
     if train_flag:
         data_all = train_data
         label_all = train_label
-        indices = range(data_all.shape[0])
+        indices = list(range(data_all.shape[0]))
         np.random.shuffle(indices)
     else:
         data_all = test_data

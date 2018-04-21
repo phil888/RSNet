@@ -3,8 +3,8 @@ import numpy as np
 import sys
 import argparse
 
-from data.utils import data_prep_util
-from data.utils import indoor3d_util
+from utils import data_prep_util
+from utils import indoor3d_util
 
 parser = argparse.ArgumentParser(description='Process input arguments.')
 
