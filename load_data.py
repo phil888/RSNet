@@ -44,11 +44,11 @@ def loadDataFile(filename):
 #- dataset setting, update when neccessay
 block_size = 1.0
 stride = 0.5
-area = 'Area_5'
+area_name = 'Area_5'
 DATA_DIR = './data/'
 
-TRAIN_DIR = os.path.join(DATA_DIR, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_train/'.format(area, block_size, stride))
-TEST_DIR = os.path.join(DATA_DIR, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test/'.format( area, block_size, block_size ))
+TRAIN_DIR = os.path.join(DATA_DIR, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_train/'.format(area_name, block_size, stride))
+TEST_DIR = os.path.join(DATA_DIR, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test/'.format(area_name, block_size, block_size))
 
 print("loading raw data...")
 train_files = glob.glob(TRAIN_DIR + '*.h5')

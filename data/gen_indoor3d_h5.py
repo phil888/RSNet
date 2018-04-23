@@ -31,6 +31,9 @@ parser.add_argument('--num_point', default=4096,
 
 args = parser.parse_args()
 
+args.area = ['Area_2', 'Area_4']
+area_name = 'Area_2_Area_4'
+
 
 # Constants
 data_dir = args.data_dir
@@ -52,7 +55,7 @@ label_dtype = 'uint8'
 # Set paths
 filelist = os.path.join('./', 'utils/meta/all_data_label.txt')
 data_label_files = [os.path.join(indoor3d_data_dir, line.rstrip()) for line in open(filelist)]
-output_dir = os.path.join(data_dir, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_{}'.format( args.area, block_size, stride, split ))
+output_dir = os.path.join(data_dir, 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_{}'.format( area_name, block_size, stride, split ))
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
@@ -104,9 +107,14 @@ def insert_batch(data, label, last_batch=False):
 
 split_list = []
 for file in data_label_files:
-    if split == 'train' and args.area not in file:
+    is_test = False
+    for area in args.area:
+        is_test = area in file
+        if is_test:
+            break
+    if split == 'train' and not is_test:
         split_list.append( file )
-    elif split == 'test' and args.area in file:
+    elif split == 'test' and is_test:
         split_list.append( file )
 
 print("{}/{} files selected".format( len(split_list), len(data_label_files) ))

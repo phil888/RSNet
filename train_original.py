@@ -6,6 +6,11 @@ import sys
 import numpy as np
 import argparse
 
+def execfile(path, global_vars=None, local_vars=None):
+    with open(path, 'r') as f:
+        code = compile(f.read(), path, 'exec')
+        exec(code, global_vars, local_vars)
+
 seed = 42
 np.random.seed(seed)
 
@@ -61,6 +66,10 @@ parser.add_argument('--results_dir', default='./results',
 
 args = parser.parse_args()
 
+args.area = ['Area_2', 'Area_4']
+area_name = 'Area_2_Area_4'
+
+
 #-- set gpu
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 
@@ -97,15 +106,16 @@ def repackage_hidden(h):
 block_size = float(args.bs)
 stride = float(args.stride)
 
-root_file_name = os.path.join(args.data_dir , 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test/room_filelist.txt'.format(args.area,block_size, block_size) )
+root_file_name = os.path.join(args.data_dir , 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test/room_filelist.txt'.format(area_name,block_size, block_size) )
 
 f = open(root_file_name)
 con = f.read().split()
 f.close()
 test_meta_list = []
 for i in con:
-    if args.area in i:
-        test_meta_list.append(i)
+    for area in args.area:
+        if args.area in i:
+            test_meta_list.append(i)
 
 #-- load visualization colors
 g_classes = [x.rstrip() for x in open( './data/utils/meta/class_names.txt')]
