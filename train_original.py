@@ -66,8 +66,8 @@ parser.add_argument('--results_dir', default='./results',
 
 args = parser.parse_args()
 
-args.area = ['Area_2', 'Area_4']
-area_name = 'Area_2_Area_4'
+args.area = ['Area_5']
+area_name = 'Area_5'
 
 
 #-- set gpu
@@ -114,7 +114,7 @@ f.close()
 test_meta_list = []
 for i in con:
     for area in args.area:
-        if args.area in i:
+        if area in i:
             test_meta_list.append(i)
 
 #-- load visualization colors
@@ -198,6 +198,7 @@ for epoch in range(start_epoch, epochs):
     hidden_list = model.init_hidden(batchsize)
     for batch in iterate_data(batchsize, resolution, train_flag = True, require_ori_data=False, block_size=block_size):
         inputs, x_indices, y_indices, z_indices, targets = batch
+
         # measure data loading time
         data_time.update(time.time() - end)
 

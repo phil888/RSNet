@@ -6,7 +6,7 @@ This directory contains source codes for preparing the S3DIS dataset for RSNet. 
 
 2. Re-organize the raw dataset by the following command:
 ```bash
-$ python collect_indoor3d_data.py --raw_data_dir stanford_indoor3d
+$ python collect_indoor3d_data.py --raw_data_dir Stanford3dDataset_v1.2_Aligned_Version
 ```
 By default, processed dataset will be stored in `./stanford_indoor3d`. Set the `--output_folder` flag to overwrite the default output path. We denote the output folder in this step as `INDOOR3D_DATA_DIR`
 

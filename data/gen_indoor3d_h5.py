@@ -31,8 +31,8 @@ parser.add_argument('--num_point', default=4096,
 
 args = parser.parse_args()
 
-args.area = ['Area_2', 'Area_4']
-area_name = 'Area_2_Area_4'
+args.area = ['Area_5']
+area_name = 'Area_5'
 
 
 # Constants

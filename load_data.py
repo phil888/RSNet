@@ -4,6 +4,8 @@ import glob
 import math
 import cv2
 import random
+import copy
+from provider import rotate_point_cloud_by_angle,jitter_point_cloud, rotate_point_cloud
 import os
 
 #-- slice processing utils
@@ -102,15 +104,22 @@ def iterate_data(batchsize, resolution, train_flag = True, require_ori_data=Fals
         
         if require_ori_data:
             ori_inputs = inputs.copy()
-        
+
+
         for b in range(inputs.shape[0]):
             minx = min(inputs[b, :, 0])
             miny = min(inputs[b, :, 1])
             inputs[b, :, 0] -= (minx+block_size/2)
             inputs[b, :, 1] -= (miny+block_size/2)
-        
+            # Data Augmentation
+            if train_flag:
+                rotation_angle = np.random.uniform() * 2 * np.pi
+                inputs[b, :, 0:3] = rotate_point_cloud_by_angle(copy.deepcopy(inputs[b, :, 0:3]), rotation_angle)
+                inputs[b, :, 6:9] = rotate_point_cloud_by_angle(copy.deepcopy(inputs[b, :, 6:9]), rotation_angle)
+                np.savetxt('test.txt', inputs[b, :, 0:6])
+
         inputs = np.expand_dims(inputs,3).astype('float32')
-        inputs = inputs.transpose(0,3,1,2)
+        inputs = inputs.transpose(0, 3, 1, 2)
 
         seg_target = label_all[excerpt].astype('int64') # num_batch, num_points
 
