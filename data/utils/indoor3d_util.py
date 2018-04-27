@@ -1,7 +1,8 @@
 import numpy as np
 import glob
 import os
-import sys
+from utils.provider import rotate_point_cloud_by_angle
+
 #BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 #ROOT_DIR = os.path.dirname(BASE_DIR)
 #sys.path.append(BASE_DIR)
@@ -72,6 +73,13 @@ def collect_point_label(anno_path, out_filename, file_format='txt'):
         fout.close()
     elif file_format=='numpy':
         np.save(out_filename, data_label)
+        """
+        for i in range(7):
+            new_data = data_label
+            rotation_angle = np.random.uniform() * 2 * np.pi
+            new_data[:, 0:3] = rotate_point_cloud_by_angle(new_data[:, 0:3],rotation_angle)
+            np.save(out_filename + '_' + str(rotation_angle), data_label)
+        """
     else:
         print('ERROR!! Unknown file format: %s, please use txt or numpy.' % \
             (file_format))
@@ -152,6 +160,9 @@ def room2blocks(data, label, num_point, block_size=1.0, stride=1.0,
     TODO: for this version, blocking is in fixed, non-overlapping pattern.
     """
     assert(stride<=block_size)
+
+    data[:, 0] -= min(data[:, 0])
+    data[:, 1] -= min(data[:, 1])
 
     limit = np.amax(data, 0)[0:3]
      

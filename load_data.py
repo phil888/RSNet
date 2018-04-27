@@ -2,10 +2,6 @@ import numpy as np
 import h5py
 import glob
 import math
-import cv2
-import random
-import copy
-from provider import rotate_point_cloud_by_angle,jitter_point_cloud, rotate_point_cloud
 import os
 
 #-- slice processing utils
@@ -99,9 +95,9 @@ def iterate_data(batchsize, resolution, train_flag = True, require_ori_data=Fals
     for batch_idx in range(num_batches):
         start_idx = batch_idx * batchsize
         excerpt = indices[start_idx:start_idx + batchsize]
-        
+
         inputs = data_all[excerpt].astype('float32')
-        
+
         if require_ori_data:
             ori_inputs = inputs.copy()
 
@@ -111,12 +107,6 @@ def iterate_data(batchsize, resolution, train_flag = True, require_ori_data=Fals
             miny = min(inputs[b, :, 1])
             inputs[b, :, 0] -= (minx+block_size/2)
             inputs[b, :, 1] -= (miny+block_size/2)
-            # Data Augmentation
-            if train_flag:
-                rotation_angle = np.random.uniform() * 2 * np.pi
-                inputs[b, :, 0:3] = rotate_point_cloud_by_angle(copy.deepcopy(inputs[b, :, 0:3]), rotation_angle)
-                inputs[b, :, 6:9] = rotate_point_cloud_by_angle(copy.deepcopy(inputs[b, :, 6:9]), rotation_angle)
-                np.savetxt('test.txt', inputs[b, :, 0:6])
 
         inputs = np.expand_dims(inputs,3).astype('float32')
         inputs = inputs.transpose(0, 3, 1, 2)
