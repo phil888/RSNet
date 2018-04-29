@@ -65,9 +65,9 @@ def jitter_point_cloud(batch_data, sigma=0.01, clip=0.05):
         Return:
           BxNx3 array, jittered batch of point clouds
     """
-    B, N, C = batch_data.shape
+    N, C = batch_data.shape
     assert(clip > 0)
-    jittered_data = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
+    jittered_data = np.clip(sigma * np.random.randn(N, C), -1*clip, clip)
     jittered_data += batch_data
     return jittered_data
 
