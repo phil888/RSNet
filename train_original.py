@@ -5,7 +5,7 @@ import time
 import sys
 import numpy as np
 import argparse
-from torchvision.transforms import ColorJitter, Compose
+from torchvision.transforms import ColorJitter, Compose, ToPILImage, ToTensor
 
 def execfile(path, global_vars=None, local_vars=None):
     with open(path, 'r') as f:
@@ -107,7 +107,7 @@ def repackage_hidden(h):
 block_size = float(args.bs)
 stride = float(args.stride)
 
-root_file_name = os.path.join(args.data_dir , 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test_1/room_filelist.txt'.format(area_name,block_size, block_size) )
+root_file_name = os.path.join(args.data_dir , 'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_test/room_filelist.txt'.format(area_name,block_size, block_size) )
 
 f = open(root_file_name)
 con = f.read().split()
@@ -197,13 +197,23 @@ for epoch in range(start_epoch, epochs):
     end = time.time()
     counter = 0
     hidden_list = model.init_hidden(batchsize)
-    for batch in iterate_data(batchsize, resolution, train_flag = True, require_ori_data=False, block_size=block_size, rgb_jitter = True):
+    for batch in iterate_data(batchsize, resolution, train_flag = True, require_ori_data=False, block_size=block_size):
         inputs, x_indices, y_indices, z_indices, targets = batch
 
         # measure data loading time
         data_time.update(time.time() - end)
 
         targets = targets.reshape(-1)
+
+        # Color jitter
+        transform = Compose([ToPILImage(),
+                             ColorJitter(brightness=1),
+                             ToTensor()])
+
+        for b in range(inputs.shape[0]):
+            img = inputs[b, :, :, 3:6]
+            img_var = transform(torch.from_numpy(img))
+            inputs[b, :, :, 3:6] = img_var.numpy()
         
         input_var = torch.autograd.Variable( torch.from_numpy( inputs ).cuda(), requires_grad = True )
         target_var = torch.autograd.Variable( torch.from_numpy( targets ).cuda(), requires_grad = False  )
@@ -211,11 +221,6 @@ for epoch in range(start_epoch, epochs):
         x_indices_var = torch.autograd.Variable( torch.from_numpy( x_indices ).cuda(), requires_grad = False  )
         y_indices_var = torch.autograd.Variable( torch.from_numpy( y_indices ).cuda(), requires_grad = False  )
         z_indices_var = torch.autograd.Variable( torch.from_numpy( z_indices ).cuda(), requires_grad = False  )
-
-        # Color jitter
-        transform = Compose([ColorJitter()])
-        for b in range(inputs.shape[0]):
-            inputs[b, :, 3:6] = transform(inputs[b, :, 3:6])
         
         
         # compute output
