@@ -31,7 +31,7 @@ parser.add_argument('--num_point', default=4096,
 
 args = parser.parse_args()
 
-args.area = ['Area_1', 'Area_3', 'Area_6']
+args.area = ['Area_2', 'Area_4']
 fold = 1
 fold_path = "Dandy_folds/"
 area_name = 'Area_5'

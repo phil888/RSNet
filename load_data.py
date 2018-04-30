@@ -90,7 +90,7 @@ def iterate_data(batchsize, resolution, train_flag = True, require_ori_data=Fals
         indices = range(data_all.shape[0])
 
     file_size = data_all.shape[0]
-    num_batches = int(math.floor( file_size / float(batchsize) ))
+    num_batches = int(math.floor(file_size / float(batchsize) ))
 
     for batch_idx in range(num_batches):
         start_idx = batch_idx * batchsize

@@ -76,7 +76,7 @@ def collect_point_label(anno_path, out_filename, file_format='txt'):
         np.save(out_filename, data_label)
         for i in range(7):
             new_data = copy.deepcopy(data_label)
-            new_data = jitter_point_cloud(new_data[:, 0:3])
+            new_data[:, 0:3] = jitter_point_cloud(new_data[:, 0:3])
             rotation_angle = np.random.uniform() * 2 * np.pi
             new_data[:, 0:3] = rotate_point_cloud_by_angle(new_data[:, 0:3],rotation_angle)
             np.save(out_filename + '_jitter_' + str(rotation_angle), data_label)

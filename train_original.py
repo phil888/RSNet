@@ -85,8 +85,8 @@ from torch.autograd import Variable
 #-- import RSNet utils
 from net import RSNet
 from utils import *
-import load_data
-from load_data import iterate_data, gen_slice_idx
+import load_data_aug
+from load_data_aug import iterate_data, gen_slice_idx, reset
 
 #-- make directories if neccessary
 if not os.path.exists(args.model_dir):
@@ -283,6 +283,7 @@ for epoch in range(start_epoch, epochs):
 
     # switch to evaluate mode
     model.eval()
+    reset()
 
     end = time.time()
     counter = 0
