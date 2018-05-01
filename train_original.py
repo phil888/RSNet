@@ -7,10 +7,7 @@ import numpy as np
 import argparse
 from torchvision.transforms import ColorJitter, Compose, ToPILImage, ToTensor
 
-def execfile(path, global_vars=None, local_vars=None):
-    with open(path, 'r') as f:
-        code = compile(f.read(), path, 'exec')
-        exec(code, global_vars, local_vars)
+from eval_iou_accuracy import eval
 
 seed = 42
 np.random.seed(seed)
@@ -201,6 +198,7 @@ for epoch in range(start_epoch, epochs):
 
         targets = targets.reshape(-1)
 
+        """
         # Color jitter
         transform = Compose([ToPILImage(),
                              ColorJitter(brightness=1),
@@ -210,7 +208,8 @@ for epoch in range(start_epoch, epochs):
             img = inputs[b, :, :, 3:6]
             img_var = transform(torch.from_numpy(img))
             inputs[b, :, :, 3:6] = img_var.numpy()
-        
+        """
+
         input_var = torch.autograd.Variable( torch.from_numpy( inputs ).cuda(), requires_grad = True )
         target_var = torch.autograd.Variable( torch.from_numpy( targets ).cuda(), requires_grad = False  )
         
@@ -328,27 +327,21 @@ for epoch in range(start_epoch, epochs):
 
 
         # dump visualizations
+        gt_data_label = []
+        pred_data_lable = []
         for b in range(inputs_ori.shape[0]):
-            counter += 1
-            pred_file_name = 'results/' + str(counter) + '_pred.obj'
-            gt_file_name = 'results/' + str(counter) + '_gt.obj'
-            fout_data_label = open(pred_file_name, 'a')
-            fout_gt_label = open(gt_file_name, 'a')
+            pred_label = []
+            gt_label = []
             for i in range(inputs_ori.shape[1]):
-                x, y, z = inputs_ori[b, i, :3]
                 idx = b * inputs_ori.shape[1] + i
                 pred = pred_val[idx]
                 gt = targets[idx]
                 #
-                color = g_label2color[pred]
-                color_gt = g_label2color[ gt ]
-                #
-                fout_data_label.write('v {} {} {} {} {} {} {}\n'.format( x, y, z, color[0], color[1], color[2], pred ) )
-                fout_gt_label.write('v {} {} {} {} {} {} {}\n'.format( x, y, z, color_gt[0], color_gt[1], color_gt[2], gt ) )
+                gt_label.append(gt)
+                pred_label.append(pred)
+            gt_data_label.append(gt_label)
+            pred_data_lable.append(pred_label)
 
-    fout_data_label.close()
-    fout_gt_label.close()
-    
     #---- dump logs
     avg_acc = np.mean( np.array(total_correct_class) / np.array(total_seen_class,dtype=np.float) )
     acc = total_correct / float(total_seen)
@@ -360,8 +353,7 @@ for epoch in range(start_epoch, epochs):
         f.write( 'Epoch {} Val Acc {:.3f} Avg Acc {:.3f}\t '
                 .format(epoch, top1.avg,  avg_acc))
 
-    execfile('eval_iou_accuracy.py')
-    
+    eval(gt_data_label=gt_data_label, pred_data_lable=pred_data_lable)
     prec1 = top1.avg
     
     # remember best prec@1 and save checkpoint
@@ -372,13 +364,3 @@ for epoch in range(start_epoch, epochs):
                     'state_dict': model.state_dict(),
                     'best_prec1': best_prec1,
                     }, is_best, filename='models/checkpoint_' + str(epoch) + '.pth.tar')
-
-
-
-
-
-
-
-
-
-
