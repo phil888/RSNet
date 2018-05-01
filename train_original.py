@@ -112,11 +112,6 @@ root_file_name = os.path.join(args.data_dir , 'indoor3d_sem_seg_hdf5_data_{}_{}m
 f = open(root_file_name)
 con = f.read().split()
 f.close()
-test_meta_list = []
-for i in con:
-    for area in args.area:
-        if area in i:
-            test_meta_list.append(i)
 
 #-- load visualization colors
 g_classes = [x.rstrip() for x in open( './data/utils/meta/class_names.txt')]
@@ -147,7 +142,7 @@ batchsize = args.batchsize
 
 
 #-- specify slice resolution
-RANGE_X, RANGE_Y, RANGE_Z = args.bs, args.bs, load_data.Z_MAX
+RANGE_X, RANGE_Y, RANGE_Z = args.bs, args.bs, load_data_aug.Z_MAX
 #- true slice resolution
 resolution_true = [args.rx, args.ry, args.rz]
 #- modified resolution for easy indexing
@@ -191,8 +186,9 @@ for epoch in range(start_epoch, epochs):
     losses = AverageMeter()
     top1 = AverageMeter()
 
-    # switch to train mode
+    print("switch to train mode")
     model.train()
+    reset()
     
     end = time.time()
     counter = 0
@@ -248,22 +244,24 @@ for epoch in range(start_epoch, epochs):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        print('Epoch: [{0}][{1}]\t'
-              'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-              'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-              'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-              'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
-               epoch, counter, batch_time=batch_time,
-               data_time=data_time, loss=losses, top1=top1))
+        if counter % 100 == 0:
+            print('Epoch: [{0}][{1}]\t'
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})'.format(
+                   epoch, counter, batch_time=batch_time,
+                   data_time=data_time, loss=losses, top1=top1))
 
-        with open('train_log.txt','a') as f:
-              f.write('Epoch: [{0}][{1}]\t'
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                      'Prec@1 {top1.val:.3f} ({top1.avg:.3f}) \n'.format(
-                       epoch, counter, batch_time=batch_time,
-                       data_time=data_time, loss=losses, top1=top1)   )
+
+            with open('train_log.txt','a') as f:
+                  f.write('Epoch: [{0}][{1}]\t'
+                          'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                          'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                          'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                          'Prec@1 {top1.val:.3f} ({top1.avg:.3f}) \n'.format(
+                           epoch, counter, batch_time=batch_time,
+                           data_time=data_time, loss=losses, top1=top1)   )
     
         counter += 1
     
@@ -281,7 +279,7 @@ for epoch in range(start_epoch, epochs):
 
     used_file_names = set([])
 
-    # switch to evaluate mode
+    print("switch to evaluate mode")
     model.eval()
     reset()
 
@@ -327,21 +325,15 @@ for epoch in range(start_epoch, epochs):
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-        
+
 
         # dump visualizations
         for b in range(inputs_ori.shape[0]):
-            room_name = test_meta_list[counter]
             counter += 1
-            pred_file_name = 'results/' + room_name + '_pred.obj'
-            gt_file_name = 'results/' + room_name + '_gt.obj'
-            if room_name not in used_file_names:
-                fout_data_label = open(pred_file_name, 'w')
-                fout_gt_label = open(gt_file_name, 'w')
-                used_file_names.add(room_name)
-            else:
-                fout_data_label = open(pred_file_name, 'a')
-                fout_gt_label = open(gt_file_name, 'a')
+            pred_file_name = 'results/' + str(counter) + '_pred.obj'
+            gt_file_name = 'results/' + str(counter) + '_gt.obj'
+            fout_data_label = open(pred_file_name, 'a')
+            fout_gt_label = open(gt_file_name, 'a')
             for i in range(inputs_ori.shape[1]):
                 x, y, z = inputs_ori[b, i, :3]
                 idx = b * inputs_ori.shape[1] + i

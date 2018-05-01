@@ -55,7 +55,9 @@ TEST_DIR = os.path.join(DATA_DIR,
 
 print("loading raw data...")
 train_files = glob.glob(TRAIN_DIR + '*.h5')
+np.random.shuffle(train_files)
 test_files = glob.glob(TEST_DIR + '*.h5')
+np.random.shuffle(test_files)
 
 assert len(train_files) != 0, "dataset not processed correctly"
 assert len(test_files) != 0, "dataset not processed correctly"
@@ -68,19 +70,43 @@ def load_data_batch(train_flag = True):
     global is_finished
     if train_flag:
         filename = train_files[train_index]
-        is_finished = train_index == train_files.shape[0] - 1
+        is_finished = train_index == len(train_files) - 1
         train_index += 1
-        return loadDataFile(filename), is_finished
+        print("Train_index")
+        print(str(train_index) + " / " + str(len(train_files) - 1))
     else:
         filename = test_files[test_index]
+        is_finished = test_index == len(test_files) - 1
         test_index += 1
-        is_finished = test_index == test_files.shape[0] - 1
-        return loadDataFile(filename)
+        print("Test_index")
+        print(str(test_index) + " / " + str(len(test_files) - 1))
+    data, label = loadDataFile(filename)
+    return data, label, is_finished
 
 def reset():
     global is_finished
+    global test_index
+    global train_index
+    test_index = 0
+    train_index = 0
     is_finished = False
 
+temp_data = np.zeros((30, 1000, 4096, 9))
+for i in range(15):
+    filename = test_files[i]
+    data_batch, _ = loadDataFile(filename)
+    temp_data[i] = data_batch
+
+
+for i in range(15):
+    filename = train_files[i]
+    data_batch, _ = loadDataFile(filename)
+    temp_data[i + 15] = data_batch
+
+
+is_finished = False
+Z_MIN, Z_MAX = temp_data[:, :, :, 2].min(), temp_data[:, :, :, 2].max()
+temp_data = []
 
 def iterate_data(batchsize, resolution, train_flag=True, require_ori_data=False, block_size=1.0):
     global is_finished
@@ -92,8 +118,6 @@ def iterate_data(batchsize, resolution, train_flag=True, require_ori_data=False,
             np.random.shuffle(indices)
         else:
             indices = range(data_all.shape[0])
-
-        Z_MIN, Z_MAX = data_all[:, :, 2].min(), data_all[:, :, 2].max()
 
         file_size = data_all.shape[0]
         num_batches = int(math.floor(file_size / float(batchsize)))
@@ -131,3 +155,5 @@ def iterate_data(batchsize, resolution, train_flag=True, require_ori_data=False,
                 yield inputs, x_slices_indices, y_slices_indices, z_slices_indices, seg_target
             else:
                 yield inputs, x_slices_indices, y_slices_indices, z_slices_indices, seg_target, ori_inputs
+
+    print("Finished")
