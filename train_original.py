@@ -216,7 +216,7 @@ for epoch in range(start_epoch, epochs):
         x_indices_var = torch.autograd.Variable( torch.from_numpy( x_indices ).cuda(), requires_grad = False  )
         y_indices_var = torch.autograd.Variable( torch.from_numpy( y_indices ).cuda(), requires_grad = False  )
         z_indices_var = torch.autograd.Variable( torch.from_numpy( z_indices ).cuda(), requires_grad = False  )
-        
+
         
         # compute output
         hidden_list = repackage_hidden(hidden_list)
@@ -283,6 +283,9 @@ for epoch in range(start_epoch, epochs):
     reset()
 
     end = time.time()
+    gt_classes = [0 for _ in range(13)]
+    positive_classes = [0 for _ in range(13)]
+    true_positive_classes = [0 for _ in range(13)]
     counter = 0
     hidden_list = model.init_hidden(batchsize)
     for batch in iterate_data(batchsize, resolution, train_flag = False, require_ori_data=True, block_size=1.0):
@@ -327,8 +330,6 @@ for epoch in range(start_epoch, epochs):
 
 
         # dump visualizations
-        gt_data_label = []
-        pred_data_lable = []
         for b in range(inputs_ori.shape[0]):
             pred_label = []
             gt_label = []
@@ -337,10 +338,9 @@ for epoch in range(start_epoch, epochs):
                 pred = pred_val[idx]
                 gt = targets[idx]
                 #
-                gt_label.append(gt)
-                pred_label.append(pred)
-            gt_data_label.append(gt_label)
-            pred_data_lable.append(pred_label)
+                gt_classes[gt] += 1
+                positive_classes[pred] += 1
+                true_positive_classes[gt] += int(gt == pred)
 
     #---- dump logs
     avg_acc = np.mean( np.array(total_correct_class) / np.array(total_seen_class,dtype=np.float) )
@@ -353,7 +353,42 @@ for epoch in range(start_epoch, epochs):
         f.write( 'Epoch {} Val Acc {:.3f} Avg Acc {:.3f}\t '
                 .format(epoch, top1.avg,  avg_acc))
 
-    eval(gt_data_label=gt_data_label, pred_data_lable=pred_data_lable)
+    print(gt_classes)
+    print(positive_classes)
+    print(true_positive_classes)
+
+    oa = sum(true_positive_classes) / float(sum(positive_classes))
+    print('Overall accuracy: {0}'.format(sum(true_positive_classes) / float(sum(positive_classes))))
+    meanAcc = 0
+    for tp, gt in zip(true_positive_classes, gt_classes):
+        if gt == 0:
+            meanAcc += 0
+        else:
+            meanAcc += (tp / float(gt))
+
+    meanAcc /= 13
+    print('Mean accuracy: {0}'.format(meanAcc))
+
+    print('IoU:')
+    iou_list = []
+    for i in range(13):
+        if float(gt_classes[i] + positive_classes[i] - true_positive_classes[i]) == 0.00:
+            if true_positive_classes[i] == 0:
+                continue
+            else:
+                iou = 0
+        else:
+            iou = true_positive_classes[i] / float(gt_classes[i] + positive_classes[i] - true_positive_classes[i])
+        print(i, iou)
+        iou_list.append(iou)
+
+    print(sum(iou_list) / 13.0)
+    meanIOU = sum(iou_list) / 13.0
+
+    with open('test_log.txt', 'a') as f:
+        f.write(' OA {:.5f} MA {:.5f} MIOU {:.5f} \n'.format(oa, meanAcc, meanIOU))
+
+
     prec1 = top1.avg
     
     # remember best prec@1 and save checkpoint

@@ -73,13 +73,13 @@ def load_data_batch(train_flag = True):
         is_finished = train_index == len(train_files) - 1
         train_index += 1
         print("Train_index")
-        print(str(train_index) + " / " + str(len(train_files) - 1))
+        print(str(train_index) + " / " + str(len(train_files)))
     else:
         filename = test_files[test_index]
         is_finished = test_index == len(test_files) - 1
         test_index += 1
         print("Test_index")
-        print(str(test_index) + " / " + str(len(test_files) - 1))
+        print(str(test_index) + " / " + str(len(test_files)))
     data, label = loadDataFile(filename)
     return data, label, is_finished
 
@@ -92,15 +92,24 @@ def reset():
     is_finished = False
 
 temp_data = np.zeros((30, 1000, 4096, 9))
+skip = 0
 for i in range(15):
-    filename = test_files[i]
+    filename = test_files[i + skip]
     data_batch, _ = loadDataFile(filename)
+    while data_batch.shape[0] != 1000:
+        skip += 1
+        filename = test_files[i + skip]
+        data_batch, _ = loadDataFile(filename)
     temp_data[i] = data_batch
 
-
+skip = 0
 for i in range(15):
-    filename = train_files[i]
+    filename = train_files[i + skip]
     data_batch, _ = loadDataFile(filename)
+    while data_batch.shape[0] != 1000:
+        skip += 1
+        filename = test_files[i + skip]
+        data_batch, _ = loadDataFile(filename)
     temp_data[i + 15] = data_batch
 
 

@@ -123,25 +123,25 @@ print("{}/{} files selected".format( len(split_list), len(data_label_files) ))
 data_label_files = split_list
 
 if split == 'test':
-    for f in range(1, 4):
-        output_dir = os.path.join(data_dir,
-                                  'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_{}_{}'.format(area_name, block_size, stride,
-                                                                                    split, f))
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
+    f = 1
+    output_dir = os.path.join(data_dir,
+                              'indoor3d_sem_seg_hdf5_data_{}_{}m_{}s_{}_{}'.format(area_name, block_size, stride,
+                                                                                split, f))
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
 
-        output_filename_prefix = os.path.join(output_dir, 'ply_data_all')
-        output_room_filelist = os.path.join(output_dir, 'room_filelist.txt')
-        fout_room = open(output_room_filelist, 'w')
+    output_filename_prefix = os.path.join(output_dir, 'ply_data_all')
+    output_room_filelist = os.path.join(output_dir, 'room_filelist.txt')
+    fout_room = open(output_room_filelist, 'w')
 
-        data_points = np.load(fold_path + "fold" + str(f) + "data.npy")
-        data_label = np.load(fold_path + "fold" + str(f) + "label.npy")
-        for i in range(data_points.shape[0]):
-            room_points = data_points[i][:, 0:6]
-            room_label = np.expand_dims(data_label[i],axis=1)
-            data_label_points = np.concatenate((room_points, room_label), axis=1)
-            data, label = indoor3d_util.room2blocks_plus_normalized(data_label_points, NUM_POINT, block_size, stride, False, None, 1)
-            insert_batch(data, label, i == len(data_label_files) - 1)
+    data_points = np.load(fold_path + "fold" + str(f) + "data.npy")
+    data_label = np.load(fold_path + "fold" + str(f) + "label.npy")
+    for i in range(data_points.shape[0]):
+        room_points = data_points[i][:, 0:6]
+        room_label = np.expand_dims(data_label[i],axis=1)
+        data_label_points = np.concatenate((room_points, room_label), axis=1)
+        data, label = indoor3d_util.room2blocks_plus_normalized(data_label_points, NUM_POINT, block_size, stride, False, None, 1)
+        insert_batch(data, label, i == len(data_label_files) - 1)
 else:
 
     sample_cnt = 0
