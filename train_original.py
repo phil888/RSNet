@@ -52,6 +52,9 @@ parser.add_argument('--batchsize', default=24,
 parser.add_argument('--weight_file', default='',
                     help='weights to load')
 
+parser.add_argument('--restart', default=False,
+                    help='Load latest model')
+
 #-- other arguments
 parser.add_argument('--gpu', default='0',
                     help='gpu index to use')
@@ -173,6 +176,19 @@ if args.weight_file != '':
     model_state.update( pre_trained_model['state_dict'] )
     model.load_state_dict(model_state)
 
+if args.restart and os.path.exists(args.model_dir) and os.listdir(args.model_dir) != []:
+    models = os.listdir(args.model_dir)
+    models.sort(key=lambda f: os.path.getmtime(args.model_dir + '/' + f))
+    pre_trained_model = torch.load(args.model_dir + '/' + models[-1])
+
+    start_epoch = pre_trained_model['epoch']
+    best_prec1 = pre_trained_model['best_prec1']
+
+    model_state = model.state_dict()
+    model_state.update(pre_trained_model['state_dict'])
+    model.load_state_dict(model_state)
+    print("Loaded latest model")
+    print(models[-1])
 
 #-- start training
 for epoch in range(start_epoch, epochs):
